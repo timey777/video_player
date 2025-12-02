@@ -3,6 +3,10 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <deque>
+#include <vector>
+#include <condition_variable>
+#include <cstring>
 #include "Player.h"
 
 #ifdef USE_SDL
@@ -22,7 +26,7 @@ int main(int argc, char** argv) {
     });
 
 #ifdef USE_SDL
-    // SDL rendering path
+    // SDL rendering path (main-thread rendering). Decoder callback will only enqueue frames.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return 1;
@@ -31,38 +35,35 @@ int main(int argc, char** argv) {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     SDL_Texture* texture = nullptr;
-    std::mutex sdl_mtx;
-    int tex_w = 0, tex_h = 0;
 
+    struct Frame {
+        std::vector<uint8_t> data;
+        int w;
+        int h;
+    };
+
+    std::deque<Frame> frameQueue;
+    std::mutex queueMtx;
+    std::condition_variable queueCv;
+    const size_t MAX_QUEUE = 3; // drop old frames when lagging
+
+    // Decoder thread -> enqueue a copy of the RGB24 frame
     player.SetVideoCallback([&](const uint8_t* data, int w, int h) {
-        std::lock_guard<std::mutex> lk(sdl_mtx);
-        if (!window) {
-            window = SDL_CreateWindow("RTSP Player", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-            if (!window) {
-                std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-                return;
-            }
-            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-            if (!renderer) {
-                std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-                return;
-            }
+        if (!data || w <= 0 || h <= 0) return;
+        Frame f;
+        try {
+            f.w = w; f.h = h;
+            f.data.resize((size_t)w * (size_t)h * 3);
+            std::memcpy(f.data.data(), data, f.data.size());
+        } catch (...) {
+            return;
         }
-
-        if (!texture || tex_w != w || tex_h != h) {
-            if (texture) SDL_DestroyTexture(texture);
-            texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, w, h);
-            tex_w = w; tex_h = h;
-            SDL_SetWindowSize(window, w, h);
+        {
+            std::lock_guard<std::mutex> lk(queueMtx);
+            frameQueue.push_back(std::move(f));
+            while (frameQueue.size() > MAX_QUEUE) frameQueue.pop_front();
         }
-
-        if (texture) {
-            int pitch = w * 3;
-            SDL_UpdateTexture(texture, nullptr, data, pitch);
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-            SDL_RenderPresent(renderer);
-        }
+        queueCv.notify_one();
     });
 
 #else
@@ -88,26 +89,67 @@ int main(int argc, char** argv) {
         std::string dummy;
         std::getline(std::cin, dummy);
         quit = true;
+        queueCv.notify_one();
     });
 
+    // Rendering loop runs in main thread: wait for frames from decoder and render them
     while (!quit) {
+        // Wait for a frame or timeout to handle events
+        std::unique_lock<std::mutex> lk(queueMtx);
+        if (frameQueue.empty()) {
+            queueCv.wait_for(lk, std::chrono::milliseconds(50));
+        }
+
+        // Handle SDL events regardless
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        if (frameQueue.empty()) {
+            if (quit) break;
+            continue;
+        }
+
+        // Pop one frame to render
+        Frame f = std::move(frameQueue.front());
+        frameQueue.pop_front();
+        lk.unlock();
+
+        if (!window) {
+            window = SDL_CreateWindow("RTSP Player", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, f.w, f.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+            if (!window) {
+                std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+                break;
+            }
+            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+            if (!renderer) {
+                std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+                break;
+            }
+        }
+
+        if (!texture) {
+            texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, f.w, f.h);
+            SDL_SetWindowSize(window, f.w, f.h);
+        }
+
+        if (texture) {
+            int pitch = f.w * 3;
+            SDL_UpdateTexture(texture, nullptr, f.data.data(), pitch);
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+            SDL_RenderPresent(renderer);
+        }
     }
 
     if (inputThread.joinable()) inputThread.join();
 
     player.Stop();
 
-    {
-        std::lock_guard<std::mutex> lk(sdl_mtx);
-        if (texture) { SDL_DestroyTexture(texture); texture = nullptr; }
-        if (renderer) { SDL_DestroyRenderer(renderer); renderer = nullptr; }
-        if (window) { SDL_DestroyWindow(window); window = nullptr; }
-    }
+    if (texture) { SDL_DestroyTexture(texture); texture = nullptr; }
+    if (renderer) { SDL_DestroyRenderer(renderer); renderer = nullptr; }
+    if (window) { SDL_DestroyWindow(window); window = nullptr; }
     SDL_Quit();
 
 #else
