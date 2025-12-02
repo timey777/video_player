@@ -1,9 +1,12 @@
 #pragma once
 #include "rtspvideo_export.h"
 #include "AVCommon.h"
-extern "C" {
-#include <libswresample/swresample.h>
-}
+
+// 前向声明 swr/AV 类型，避免在头文件中包含 libswresample 等 heavy headers
+struct SwrContext;
+struct AVChannelLayout;
+enum AVSampleFormat : int;
+
 class RTSPVIDEO_API AudioResampler
 {
 public:

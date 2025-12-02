@@ -1,11 +1,13 @@
 #include "PCMPlayer.h"
+#include <AL/al.h>
+#include <AL/alc.h>
 
 PCMPlayer::PCMPlayer(int ch, int sr, int bps, int bufSamps, int bufCount)
     : sampleRate(sr)
 {
     device = alcOpenDevice(nullptr);
-    context = alcCreateContext(device, nullptr);
-    alcMakeContextCurrent(context);
+    context = alcCreateContext((ALCdevice*)device, nullptr);
+    alcMakeContextCurrent((ALCcontext*)context);
 
     format = (bps == 16 ? (ch == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16)
         : (ch == 2 ? AL_FORMAT_STEREO8 : AL_FORMAT_MONO8));
@@ -21,8 +23,8 @@ PCMPlayer::~PCMPlayer() {
     alDeleteSources(1, &source);
     alDeleteBuffers(buffers.size(), buffers.data());
     alcMakeContextCurrent(nullptr);
-    alcDestroyContext(context);
-    alcCloseDevice(device);
+    alcDestroyContext((ALCcontext*)context);
+    alcCloseDevice((ALCdevice*)device);
 }
 
 bool PCMPlayer::start() {

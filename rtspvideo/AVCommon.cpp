@@ -1,3 +1,8 @@
+extern "C" {
+#include <libavutil/error.h>
+#include <libavutil/frame.h>
+#include <libavcodec/avcodec.h>
+}
 #include "AVCommon.h"
 using namespace avcommon;
 // AVFramePtr

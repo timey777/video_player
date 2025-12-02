@@ -2,6 +2,9 @@
 #include "Player.h"
 #include <iostream>
 #include <cstring>
+extern "C" {
+#include <libavutil/frame.h>
+}
 
 Player::Player()
     : m_decoder(new MediaDecoder())

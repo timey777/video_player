@@ -5,13 +5,11 @@
 #include <array>
 #include <memory>
 #include <stdexcept>
-extern "C" {
-#include <libavutil/error.h>
-#include <libavutil/frame.h>
-#include <libavcodec/avcodec.h>
-}
-
 #include "rtspvideo_export.h"
+
+// 前向声明 FFmpeg 类型，避免在头文件中包含 heavy headers
+struct AVFrame;
+struct AVPacket;
 
 namespace avcommon
 {

@@ -40,7 +40,7 @@ set (ALURE_DIR ${3RD_DIR}/alure)
 add_subdirectory (${ALURE_DIR} ${BUILD_DIR}/alure)
 set_target_properties(alure2_s PROPERTIES FOLDER openal)
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 # 定义导出宏，构建库时导出符号
 target_compile_definitions(${PROJECT_NAME} PRIVATE RTSPVIDEO_EXPORTS ${CPP_DEFS})
@@ -69,14 +69,14 @@ message(STATUS "FFmpeg头文件目录: ${FFMPEG_INCLUDE_DIR}")
 # ========================
 # 项目配置
 # ========================
-target_include_directories(${PROJECT_NAME} PRIVATE
+target_include_directories(${PROJECT_NAME} PUBLIC
     ${FFMPEG_INCLUDE_DIR}
 )
-target_link_directories(${PROJECT_NAME} PRIVATE
+target_link_directories(${PROJECT_NAME} PUBLIC
     ${FFMPEG_ROOT}/lib
 )
-# 直接链接FFmpeg库（按依赖顺序）
-target_link_libraries(${PROJECT_NAME} PRIVATE
+# 直接链接FFmpeg库（按依赖顺序） — 对使用者可见以便静态库消费者链接
+target_link_libraries(${PROJECT_NAME} PUBLIC
     avformat
     avcodec
     swscale

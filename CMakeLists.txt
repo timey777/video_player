@@ -44,8 +44,14 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 ########################################
-
+# SDL2
+set(SDL_STATIC ON CACHE BOOL "Build static library" FORCE)
+set(SDL_SHARED OFF CACHE BOOL "Build shared library" FORCE)
+set(SDL_TEST OFF CACHE BOOL "Build Test library" FORCE)
+set(SDL2_DISABLE_SDL2MAIN OFF CACHE BOOL "Disable SDL2main" FORCE)
+set (SDL2_DIR ${3RD_DIR}/SDL2)
+add_subdirectory (${SDL2_DIR})
 ########################################
-add_subdirectory(rtsp_video_player)
 add_subdirectory(rtspvideo)
+add_subdirectory(rtsp_video_player)
 

@@ -1,12 +1,14 @@
 #pragma once
 #include "rtspvideo_export.h"
-#include <AL/al.h>
-#include <AL/alc.h>
 #include <mutex>
 #include <queue>
 #include <thread>
 #include <atomic>
 #include <vector>
+
+// 轻量定义 OpenAL 基本类型，避免在头文件中包含 heavy header
+using ALuint = unsigned int;
+using ALenum = int;
 
 class RTSPVIDEO_API PCMPlayer {
 public:
@@ -19,8 +21,8 @@ private:
     void audioLoop();
     void update();
 
-    ALCdevice* device = nullptr;
-    ALCcontext* context = nullptr;
+    void* device = nullptr; // actually ALCdevice*
+    void* context = nullptr; // actually ALCcontext*
     ALuint source = 0;
     std::vector<ALuint> buffers;
     std::queue<ALuint> freeBuffers;

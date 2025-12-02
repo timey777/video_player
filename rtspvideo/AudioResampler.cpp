@@ -1,3 +1,8 @@
+extern "C" {
+#include <libswresample/swresample.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/samplefmt.h>
+}
 #include "AudioResampler.h"
 #include <iostream>
 

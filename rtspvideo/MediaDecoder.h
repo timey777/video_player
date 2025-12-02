@@ -5,14 +5,15 @@
 #include <string>
 #include <functional>
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libswresample/swresample.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/channel_layout.h>
-}
+// 前向声明 FFmpeg 相关类型，避免在头文件中包含 heavy headers
+struct AVFormatContext;
+struct AVCodecContext;
+struct SwsContext;
+struct SwrContext;
+struct AVFrame;
+struct AVPacket;
+struct AVChannelLayout;
+enum AVSampleFormat : int;
 
 class RTSPVIDEO_API MediaDecoder {
 public:
