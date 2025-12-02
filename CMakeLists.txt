@@ -47,4 +47,5 @@ endif()
 
 ########################################
 add_subdirectory(rtsp_video_player)
+add_subdirectory(rtspvideo)
 

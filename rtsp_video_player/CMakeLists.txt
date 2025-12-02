@@ -29,17 +29,6 @@ include_directories(${PROJECT_SOURCE_DIR})
 file (GLOB_RECURSE SOURCE_FILES RELATIVE ${PROJECT_SOURCE_DIR} *.cpp *.h)
 source_group_by_dir(SOURCE_FILES)
 
-# openal-soft
-set (OPENAL_SOFT_DIR ${3RD_DIR}/openal)
-add_subdirectory (${OPENAL_SOFT_DIR} ${BUILD_DIR}/openal)
-SET(CPP_DEFS ${CPP_DEFS} AL_LIBTYPE_STATIC)
-set_target_properties(OpenAL common bin2h bsincgen PROPERTIES FOLDER openal)
-
-# alure
-set (ALURE_DIR ${3RD_DIR}/alure)
-add_subdirectory (${ALURE_DIR} ${BUILD_DIR}/alure)
-set_target_properties(alure2_s PROPERTIES FOLDER openal)
-
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${CPP_DEFS})
