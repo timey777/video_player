@@ -1278,22 +1278,14 @@ SET(NATIVE_SRC_DIR  "${OpenAL_SOURCE_DIR}/native-tools/")
 SET(NATIVE_BIN_DIR  "${OpenAL_BINARY_DIR}/native-tools/")
 FILE(MAKE_DIRECTORY "${NATIVE_BIN_DIR}")
 
-SET(BIN2H_COMMAND  "${NATIVE_BIN_DIR}bin2h")
-SET(BSINCGEN_COMMAND  "${NATIVE_BIN_DIR}bsincgen")
-ADD_CUSTOM_COMMAND(OUTPUT "${BIN2H_COMMAND}" "${BSINCGEN_COMMAND}"
-    COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" "${NATIVE_SRC_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E remove "${BIN2H_COMMAND}" "${BSINCGEN_COMMAND}"
-    COMMAND ${CMAKE_COMMAND} --build . --config "Release"
-    WORKING_DIRECTORY "${NATIVE_BIN_DIR}"
-    DEPENDS "${NATIVE_SRC_DIR}CMakeLists.txt"
-    IMPLICIT_DEPENDS C "${NATIVE_SRC_DIR}bin2h.c"
-                     C "${NATIVE_SRC_DIR}bsincgen.c"
-    VERBATIM
-)
-ADD_CUSTOM_TARGET(native-tools
-    DEPENDS "${BIN2H_COMMAND}" "${BSINCGEN_COMMAND}"
-    VERBATIM
-)
+# Build native-tools as a normal subdirectory/targets instead of calling nested CMake
+add_subdirectory("${NATIVE_SRC_DIR}" "${NATIVE_BIN_DIR}")
+
+# Use target file locations for the helper commands; generator expressions will
+# resolve to the correct built executable paths when the targets are available.
+set(BIN2H_COMMAND $<TARGET_FILE:bin2h>)
+set(BSINCGEN_COMMAND $<TARGET_FILE:bsincgen>)
+
 
 option(ALSOFT_EMBED_HRTF_DATA "Embed the HRTF data files (increases library footprint)" ON)
 if(ALSOFT_EMBED_HRTF_DATA)

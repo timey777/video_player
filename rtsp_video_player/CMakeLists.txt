@@ -33,7 +33,7 @@ source_group_by_dir(SOURCE_FILES)
 set (OPENAL_SOFT_DIR ${3RD_DIR}/openal)
 add_subdirectory (${OPENAL_SOFT_DIR} ${BUILD_DIR}/openal)
 SET(CPP_DEFS ${CPP_DEFS} AL_LIBTYPE_STATIC)
-set_target_properties(OpenAL native-tools common PROPERTIES FOLDER openal)
+set_target_properties(OpenAL common bin2h bsincgen PROPERTIES FOLDER openal)
 
 # alure
 set (ALURE_DIR ${3RD_DIR}/alure)
@@ -48,16 +48,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE alure2_s)
 
 target_include_directories (${PROJECT_NAME} PRIVATE ${OPENAL_SOFT_DIR}/include)
 target_include_directories (${PROJECT_NAME} PRIVATE ${ALURE_DIR}/include)
-# 链接wxWidgets
-set (WXWIDGETS_DIR ${3RD_DIR}/wxWidgets)
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${WXWIDGETS_DIR}/include
-    ${WXWIDGETS_DIR}/include/msvc  # 如果使用 MSVC
-)
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-    wx::core wx::base wx::gl wx::adv wx::aui wx::xrc wx::net wx::richtext wx::media wx::xml wx::webview wx::html
-)
 
 
 # ========================

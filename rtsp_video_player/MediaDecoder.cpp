@@ -36,7 +36,7 @@ bool MediaDecoder::Open(const std::string& url) {
 	}
 
 	if (m_audIdx >= 0) {
-		// ³õÊ¼»¯½âÂëÆ÷
+		// åˆå§‹åŒ–è§£ç å™¨
 		auto codecParams = m_fmtCtx->streams[m_audIdx]->codecpar;
 		auto codec = avcodec_find_decoder(codecParams->codec_id);
 		m_aCtx = avcodec_alloc_context3(codec);
@@ -51,15 +51,15 @@ bool MediaDecoder::Open(const std::string& url) {
 		AVChannelLayout inChannelLayout;
 		av_channel_layout_copy(&inChannelLayout, &codecParams->ch_layout);
 		int ret = swr_alloc_set_opts2(
-			&swr,                     // Êä³ö²ÎÊı£ºSwrContext**
-			&outChannelLayout,           // Êä³öÉùµÀ²¼¾Ö
-			AV_SAMPLE_FMT_S16,           // Êä³ö¸ñÊ½£º16-bit PCM
-			44100,                       // Êä³ö²ÉÑùÂÊ
-			&inChannelLayout,            // ÊäÈëÉùµÀ²¼¾Ö
-			m_aCtx->sample_fmt,        // ÊäÈë¸ñÊ½
-			codecParams->sample_rate,    // ÊäÈë²ÉÑùÂÊ
-			0,                           // ÈÕÖ¾Æ«ÒÆ
-			nullptr                      // ÈÕÖ¾ÉÏÏÂÎÄ
+			&swr,                     // è¾“å‡ºå‚æ•°ï¼šSwrContext**
+			&outChannelLayout,           // è¾“å‡ºå£°é“å¸ƒå±€
+			AV_SAMPLE_FMT_S16,           // è¾“å‡ºæ ¼å¼ï¼š16-bit PCM
+			44100,                       // è¾“å‡ºé‡‡æ ·ç‡
+			&inChannelLayout,            // è¾“å…¥å£°é“å¸ƒå±€
+			m_aCtx->sample_fmt,        // è¾“å…¥æ ¼å¼
+			codecParams->sample_rate,    // è¾“å…¥é‡‡æ ·ç‡
+			0,                           // æ—¥å¿—åç§»
+			nullptr                      // æ—¥å¿—ä¸Šä¸‹æ–‡
 		);
 		if (ret < 0 || !swr || swr_init(swr) < 0) {
 			std::cerr << "swr_alloc_set_opts2 failed " << ret << "\n";

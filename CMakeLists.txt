@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.10)
 set(PROJECT_NAME video_player)
 project (${PROJECT_NAME})
 set (${PROJECT_NAME}_VERSION_MAJOR 1)
@@ -44,22 +44,6 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 ########################################
-# wxWidgets
-# 设置wxWidgets选项
-set(wxUSE_RIBBON        OFF CACHE BOOL "" FORCE)
-set(wxUSE_RIBBON_NATIVE OFF CACHE BOOL "" FORCE)
-set(wxUSE_PROPGRID OFF)
-set(wxUSE_DEBUGREPORT OFF) 
-set(wxBUILD_QA OFF) 
-set(wxUSE_STC OFF)  # 禁用 Scintilla 组件
-set(wxBUILD_SHARED OFF)
-set(wxBUILD_TESTS OFF)
-set (WXWIDGETS_DIR ${3RD_DIR}/wxWidgets)
-if(WIN32)
-add_subdirectory (${WXWIDGETS_DIR})
-else()
-find_package(wxWidgets)
-endif()
 
 ########################################
 add_subdirectory(rtsp_video_player)

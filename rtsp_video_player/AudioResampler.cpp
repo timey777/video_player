@@ -19,15 +19,15 @@ bool AudioResampler::Init(int in_samplerate, AVChannelLayout in_layout, AVSample
 	out_layout_ = out_layout;
 	out_format_ = out_format;
 	int ret = swr_alloc_set_opts2(
-		&swrCtx,                     // Êä³ö²ÎÊı£ºSwrContext**
-		&out_layout,           // Êä³öÉùµÀ²¼¾Ö
-		out_format,           // Êä³ö¸ñÊ½£º16-bit PCM
-		out_samplerate,                       // Êä³ö²ÉÑùÂÊ
-		&in_layout,            // ÊäÈëÉùµÀ²¼¾Ö
-		in_format,        // ÊäÈë¸ñÊ½
-		in_samplerate,    // ÊäÈë²ÉÑùÂÊ
-		0,                           // ÈÕÖ¾Æ«ÒÆ
-		nullptr                      // ÈÕÖ¾ÉÏÏÂÎÄ
+		&swrCtx,                     // è¾“å‡ºå‚æ•°ï¼šSwrContext**
+		&out_layout,           // è¾“å‡ºå£°é“å¸ƒå±€
+		out_format,           // è¾“å‡ºæ ¼å¼ï¼š16-bit PCM
+		out_samplerate,                       // è¾“å‡ºé‡‡æ ·ç‡
+		&in_layout,            // è¾“å…¥å£°é“å¸ƒå±€
+		in_format,        // è¾“å…¥æ ¼å¼
+		in_samplerate,    // è¾“å…¥é‡‡æ ·ç‡
+		0,                           // æ—¥å¿—åç§»
+		nullptr                      // æ—¥å¿—ä¸Šä¸‹æ–‡
 	);
 	if (ret < 0 || !swrCtx) {
 		std::cerr << "Error: Failed to init resampler" << std::endl;

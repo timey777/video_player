@@ -81,9 +81,9 @@ void PCMPlayer::audioLoop() {
                 alSourcePlay(source);
         }
         else {
-            // ¶ÓÁĞ¿ÕÊ±±£³ÖÍ£Ö¹×´Ì¬£¬²»ÖØÆô
+            // é˜Ÿåˆ—ç©ºæ—¶ä¿æŒåœæ­¢çŠ¶æ€ï¼Œä¸é‡å¯
         }
-        update();  // »ØÊÕ processed buffers
+        update();  // å›æ”¶ processed buffers
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
